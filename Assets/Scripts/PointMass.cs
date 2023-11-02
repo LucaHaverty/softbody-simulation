@@ -1,15 +1,14 @@
 using UnityEngine;
 
-public class Point : MonoBehaviour {
+public class PointMass : MonoBehaviour {
    private const float FORCE_OF_GRAVITY = 9.807f;
    private const float FLOOR_LEVEL = -5;
    
    [SerializeField] private float mass;
    [SerializeField] private Vector3 velocity;
 
-   public void SetValues(float mass, Vector3 startingVelocity) {
+   public void SetValues(float mass) {
       this.mass = mass;
-      this.velocity = startingVelocity;
    }
 
    private void LateUpdate() {

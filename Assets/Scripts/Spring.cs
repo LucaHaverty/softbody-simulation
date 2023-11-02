@@ -1,13 +1,13 @@
 using UnityEngine;
 
 public class Spring : MonoBehaviour {
-    [SerializeField] private Point referencePointA;
-    [SerializeField] private Point referencePointB;
+    private PointMass referencePointA;
+    private PointMass referencePointB;
     
-    [SerializeField] private float restingLength;
-    [SerializeField] private float springConstant;
+    private float restingLength;
+    private float springConstant;
 
-    public void SetValues(float restingLength, float springConstant, Point referencePointA, Point referencePointB) {
+    public void SetValues(float restingLength, float springConstant, PointMass referencePointA, PointMass referencePointB) {
         this.restingLength = restingLength;
         this.springConstant = springConstant;
 
