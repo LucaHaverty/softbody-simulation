@@ -10,7 +10,7 @@ public class SimulationRunner : MonoBehaviour {
     private void Awake() {
         Instance = this;
         
-        _simObjects.Add(new Rope());
+        _simObjects.Add(new Cube());
     }
 
     public static PointMass InstantiatePoint(Vector3 position, Transform parent, float mass) {
