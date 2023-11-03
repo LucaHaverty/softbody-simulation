@@ -21,8 +21,6 @@ public class Spring : MonoBehaviour {
     }
 
     private void Update() {
-        ApplyForceToPoints();
-        UpdateLineRenderer();
     }
 
     public void ApplyForceToPoints() {

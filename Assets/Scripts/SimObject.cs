@@ -11,14 +11,6 @@ public abstract class SimObject {
     protected SimObject(string name) {
         _rootGameObject = new GameObject(name);
     }
-
-    public void UpdatePoints() {
-        throw new NotImplementedException();
-    }
-
-    public void UpdateSprings() {
-        throw new NotImplementedException();
-    }
 }
 
 public class Rope : SimObject {

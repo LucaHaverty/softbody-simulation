@@ -7,10 +7,28 @@ public class SimulationRunner : MonoBehaviour {
 
     private List<SimObject> _simObjects = new();
 
+    private List<PointMass> _points = new();
+    private List<Spring> _springs = new();
+
     private void Awake() {
         Instance = this;
         
         _simObjects.Add(new Cube());
+    }
+
+    private void Update() {
+        _springs.ForEach(s => {
+            s.ApplyForceToPoints();
+        });
+        
+        _points.ForEach(p => {
+            p.ApplyGravity();
+            p.UpdatePosition();
+        });
+        
+        _springs.ForEach(s => {
+            s.UpdateLineRenderer();
+        });
     }
 
     public static PointMass InstantiatePoint(Vector3 position, Transform parent, float mass) {
@@ -18,6 +36,8 @@ public class SimulationRunner : MonoBehaviour {
             .GetComponent<PointMass>();
 
         point.SetValues(mass);
+        Instance._points.Add(point);
+
         return point;
     }
 
@@ -29,6 +49,8 @@ public class SimulationRunner : MonoBehaviour {
                 Quaternion.identity, parent).GetComponent<Spring>();
 
         spring.SetValues(springConstant, restingLength, refA, refB);
+        
+        Instance._springs.Add(spring);
         return spring;
     }
     

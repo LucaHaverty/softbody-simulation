@@ -9,11 +9,6 @@ public class PointMass : MonoBehaviour {
       this.mass = mass;
    }
 
-   private void LateUpdate() {
-      ApplyGravity();
-      UpdatePosition();
-   }
-
    public void ApplyGravity() {
       ApplyForce(SimulationConfig.ForceOfGravity*mass, Vector3.down);
    }
