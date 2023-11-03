@@ -7,15 +7,25 @@ public class Spring : MonoBehaviour {
     private float restingLength;
     private float springConstant;
 
+    private LineRenderer _lineRenderer;
+
     public void SetValues(float restingLength, float springConstant, PointMass referencePointA, PointMass referencePointB) {
         this.restingLength = restingLength;
         this.springConstant = springConstant;
 
         this.referencePointA = referencePointA;
         this.referencePointB = referencePointB;
+
+        _lineRenderer = GetComponent<LineRenderer>();
+        UpdateLineRenderer();
     }
 
     private void Update() {
+        ApplyForceToPoints();
+        UpdateLineRenderer();
+    }
+
+    public void ApplyForceToPoints() {
         Vector3 posA = referencePointA.transform.position;
         Vector3 posB = referencePointB.transform.position;
 
@@ -28,6 +38,10 @@ public class Spring : MonoBehaviour {
 
         referencePointA.ApplyForce(springForce, normal);
         referencePointB.ApplyForce(springForce, -normal);
-        Debug.Log(springForce*-normal);
+    }
+
+    public void UpdateLineRenderer() {
+        _lineRenderer.SetPosition(0, referencePointA.transform.position);
+        _lineRenderer.SetPosition(1, referencePointB.transform.position);
     }
 }

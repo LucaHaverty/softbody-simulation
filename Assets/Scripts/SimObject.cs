@@ -10,6 +10,9 @@ public abstract class SimObject {
 
     protected SimObject(string name) {
         _rootGameObject = new GameObject(name);
+
+        _springs = new();
+        _points = new();
     }
 
     public void UpdatePoints() {
@@ -22,7 +25,7 @@ public abstract class SimObject {
 }
 
 public class Rope : SimObject {
-    public Rope(int numPoints, float pointSpacing, float pointMass, float springConstant) 
+    public Rope(int numPoints = 5, float pointSpacing = 0.5f, float pointMass = 1, float springConstant = 1) 
         : base($"Rope ({numPoints})") {
         
         for (int p = 0; p < numPoints; p++) {
@@ -32,7 +35,7 @@ public class Rope : SimObject {
 
         for (int s = 0; s < numPoints - 1; s++) {
             _springs.Add(SimulationRunner.InstantiateSpring(
-                _rootGameObject.transform, springConstant, _points[s], _points[s-1]));
+                _rootGameObject.transform, springConstant, _points[s], _points[s+1]));
         }
     }
 }
@@ -47,7 +50,7 @@ public class Plane : SimObject {
 
 public class Cube : SimObject {
     public Cube(int length, int width, int height, float pointSpacing, float pointMass, float springConstant) 
-        : base($"Plane ({length}, {width}, {height})") {
+        : base($"Cube ({length}, {width}, {height})") {
 
         throw new NotImplementedException();
     }
