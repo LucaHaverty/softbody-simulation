@@ -4,6 +4,8 @@ public class PointMass : MonoBehaviour {
    
    [SerializeField] private float mass;
    [SerializeField] private Vector3 velocity;
+   
+   public Vector3 Velocity => velocity;
 
    public void SetValues(float mass) {
       this.mass = mass;

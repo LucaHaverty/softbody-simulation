@@ -263,7 +263,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _pointPrefab: {fileID: 302800644388617583, guid: 644a2eb242401dd4aae96b7896ee6a55, type: 3}
   _springPrefab: {fileID: 7361347132407784062, guid: 89958afceacb7ea44b236d092da1e48c, type: 3}
-  _forceOfGravity: 0
+  _forceOfGravity: 0.03
   _floorLevel: -5
 --- !u!1 &963194225
 GameObject:
