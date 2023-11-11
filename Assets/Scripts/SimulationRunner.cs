@@ -12,7 +12,7 @@ public class SimulationRunner : MonoBehaviour {
     private void Awake() {
         Instance = this;
         
-        _simObjects.Add(new Cube(springConstant: 20, width: 20, length: 20, height: 20));
+        _simObjects.Add(new Cube(springConstant: 10, width: 5, length: 5, height: 5));
     }
 
     private void Update() {
