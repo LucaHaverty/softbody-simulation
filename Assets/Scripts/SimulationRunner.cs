@@ -6,9 +6,6 @@ public class SimulationRunner : MonoBehaviour {
 
     private readonly List<SimObject> _simObjects = new();
 
-    private readonly List<PointMass> _points = new();
-    private readonly List<Spring> _springs = new();
-
     private void Awake() {
         Instance = this;
         
@@ -16,17 +13,8 @@ public class SimulationRunner : MonoBehaviour {
     }
 
     private void Update() {
-        _springs.ForEach(s => {
-            s.ApplyForceToPoints();
-        });
-        
-        _points.ForEach(p => {
-            p.ApplyGravity();
-            p.UpdatePosition();
-        });
-        
-        _springs.ForEach(s => {
-            s.UpdateLineRenderer();
+        _simObjects.ForEach(s => {
+            s.Update();
         });
     }
 
@@ -35,8 +23,6 @@ public class SimulationRunner : MonoBehaviour {
             .GetComponent<PointMass>();
 
         point.SetValues(mass);
-        Instance._points.Add(point);
-
         return point;
     }
 
@@ -48,8 +34,6 @@ public class SimulationRunner : MonoBehaviour {
             Quaternion.identity, parent).GetComponent<Spring>();
 
         spring.SetValues(springConstant, dampingConstant, refA, refB);
-
-        Instance._springs.Add(spring);
         return spring;
     }
 }

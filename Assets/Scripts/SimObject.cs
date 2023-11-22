@@ -7,8 +7,36 @@ public abstract class SimObject {
     protected readonly List<PointMass> _points = new();
     protected readonly List<Spring> _springs = new();
 
+    public Vector3 EstimatedPosition = Vector3.zero;
+    public Vector3 EstimatedVelocity = Vector3.zero;
+
     protected SimObject(string name) {
         _rootGameObject = new GameObject(name);
+    }
+
+    public void Update() {
+        _springs.ForEach(s => {
+            s.ApplyForceToPoints();
+        });
+        
+        _points.ForEach(p => {
+            p.ApplyGravity();
+            p.UpdatePosition();
+        });
+        
+        _springs.ForEach(s => {
+            s.UpdateLineRenderer();
+        });
+
+        var prevPos = EstimatedPosition;
+        
+        Vector3 sum = Vector3.zero;
+        _points.ForEach(p => sum += p.transform.position);
+        
+        EstimatedPosition = sum / _points.Count;
+        EstimatedVelocity = (EstimatedPosition - prevPos) / Time.deltaTime;
+        
+        Debug.Log($"{EstimatedPosition}, {EstimatedVelocity}");
     }
 }
 
