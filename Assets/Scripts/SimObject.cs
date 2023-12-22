@@ -46,7 +46,7 @@ public abstract class SimObject {
     }
 
     public void DestroyRootObject() {
-        Object.Destroy(_rootGameObject);
+        Object.Destroy(_rootGameObject); 
     }
 }
 
