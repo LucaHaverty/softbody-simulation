@@ -2,29 +2,25 @@ using UnityEngine;
 
 public class PointMass : MonoBehaviour {
    
-   [SerializeField] private float mass;
    [SerializeField] private Vector3 velocity;
    
    public Vector3 Velocity => velocity;
 
-   public void SetValues(float mass) {
-      this.mass = mass;
-   }
-
    public void ApplyGravity() {
-      ApplyForce(SimulationConfig.ForceOfGravity*mass, Vector3.down);
+      ApplyForce(SimConfig.ForceOfGravity*SimConfig.PointMass, Vector3.down);
    }
 
    public void ApplyForce(float force, Vector3 normal) {
-      velocity += (force * normal) / mass;
+      velocity += (force * normal) / SimConfig.PointMass;
    }
 
    public void UpdatePosition() {
-      transform.position += velocity * Time.deltaTime;
+      transform.position += velocity * Time.fixedDeltaTime;
 
-      if (transform.position.y < SimulationConfig.FloorLevel) {
+      if (transform.position.y < 0) {
          velocity.y = 0;
-         transform.position = new Vector3(transform.position.x, SimulationConfig.FloorLevel, transform.position.z);
+         transform.position = new Vector3(transform.position.x, 0, transform.position.z);
+         SimRunner.Instance.HasCollidedWithFloor = true;
       }
    }
 }

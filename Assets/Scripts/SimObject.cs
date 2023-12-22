@@ -1,17 +1,25 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public abstract class SimObject {
     protected readonly GameObject _rootGameObject;
 
-    protected readonly List<PointMass> _points = new();
+    protected List<PointMass> _points;
     protected readonly List<Spring> _springs = new();
 
-    public Vector3 EstimatedPosition = Vector3.zero;
-    public Vector3 EstimatedVelocity = Vector3.zero;
+    private Vector3 _estimatedPosition = Vector3.zero;
+    private Vector3 _estimatedVelocity = Vector3.zero;
+
+    public Vector3 EstimatedPosition => _estimatedPosition;
+    public Vector3 EstimatedVelocity => _estimatedVelocity;
 
     protected SimObject(string name) {
-        _rootGameObject = new GameObject(name);
+        _rootGameObject = new(name) {
+            transform = {
+                position = Vector3.up * SimConfig.StartHeight
+            }
+        };
     }
 
     public void Update() {
@@ -28,19 +36,66 @@ public abstract class SimObject {
             s.UpdateLineRenderer();
         });
 
-        var prevPos = EstimatedPosition;
+        var prevPos = _estimatedPosition;
         
         Vector3 sum = Vector3.zero;
         _points.ForEach(p => sum += p.transform.position);
         
-        EstimatedPosition = sum / _points.Count;
-        EstimatedVelocity = (EstimatedPosition - prevPos) / Time.deltaTime;
-        
-        Debug.Log($"{EstimatedPosition}, {EstimatedVelocity}");
+        _estimatedPosition = sum / _points.Count;
+        _estimatedVelocity = (_estimatedPosition - prevPos) / Time.deltaTime;
+    }
+
+    public void DestroyRootObject() {
+        Object.Destroy(_rootGameObject);
     }
 }
 
-public class Rope : SimObject {
+public class Cube : SimObject {
+    public Cube(int length, int width, int height, 
+        float pointSpacing)
+        : base($"Cube ({length}, {width}, {height})") {
+
+        // Center offset
+        _rootGameObject.transform.Translate(-new Vector3(length*pointSpacing/2, width*pointSpacing/2, height*pointSpacing/2));
+
+        Dictionary<Vector3Int, PointMass> pointsDict = new();
+
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                for (int l = 0; l < length; l++) {
+                    pointsDict.Add(new Vector3Int(l,w,h), SimRunner.InstantiatePoint(
+                        Vector3.up * (pointSpacing * h) + Vector3.right * (pointSpacing * w)
+                                                        + Vector3.forward * (pointSpacing * l),
+                        _rootGameObject.transform));
+                }
+            }
+        }
+
+        void AttemptAddConnection(PointMass pointA, Vector3Int posB) {
+            if (!pointsDict.TryGetValue(posB, out var pointB)) 
+                return;
+            
+            if (pointA == pointB)
+                return;
+                
+            _springs.Add(SimRunner.InstantiateSpring(
+                _rootGameObject.transform, pointA, pointB));
+        }
+        
+        foreach (var kvp in pointsDict) {
+            for (int h = 0; h <= 1; h++) {
+                for (int w = 0; w <= 1; w++) {
+                    for (int l = 0; l <= 1; l++) {
+                        AttemptAddConnection(kvp.Value, kvp.Key + new Vector3Int(l, w, h));
+                    }
+                }
+            }
+        }
+
+        _points = pointsDict.Values.ToList();
+    }
+    
+    /*public class Rope : SimObject {
     public Rope(int numPoints = 5, float pointSpacing = 0.5f, float pointMass = 1, float springConstant = 8,
         float dampingConstant = 0.1f)
         : base($"Rope ({numPoints})") {
@@ -88,58 +143,5 @@ public class Plane : SimObject {
             }
         }
     }
-}
-
-public class Cube : SimObject {
-    public Cube(int length = 5, int width = 5, int height = 5, float pointSpacing = 0.5f, float pointMass = 1,
-        float springConstant = 5, float dampingConstant = 0.1f)
-        : base($"Cube ({length}, {width}, {height})") {
-
-        for (int p = 0; p < length; p++) {
-            for (int p1 = 0; p1 < width; p1++) {
-                for (int p2 = 0; p2 < height; p2++) {
-                    _points.Add(SimulationRunner.InstantiatePoint(
-                        Vector3.up * (pointSpacing * p) + Vector3.right * (pointSpacing * p1)
-                                                        + Vector3.forward * (pointSpacing * p2),
-                        _rootGameObject.transform, pointMass));
-                }
-            }
-        }
-
-        for (int s = 0; s < length - 1; s++) {
-            for (int s1 = 0; s1 < width - 1; s1++) {
-                for (int s2 = 0; s2 < height - 1; s2++) {
-
-                    int startIndex = s2 + (height * s1) + (height * width * s);
-
-                    _springs.Add(SimulationRunner.InstantiateSpring(
-                        _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                        _points[startIndex + 1]));
-
-                    _springs.Add(SimulationRunner.InstantiateSpring(
-                        _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                        _points[startIndex + length]));
-
-                    _springs.Add(SimulationRunner.InstantiateSpring(
-                        _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                        _points[startIndex + length + 1]));
-
-                    _springs.Add(SimulationRunner.InstantiateSpring(
-                        _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                        _points[startIndex + length * width]));
-
-                    _springs.Add(SimulationRunner.InstantiateSpring(
-                        _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                        _points[startIndex + length * width + 1]));
-
-                    _springs.Add(SimulationRunner.InstantiateSpring(
-                        _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                        _points[startIndex + length*width + height]));
-                    _springs.Add(SimulationRunner.InstantiateSpring(
-                        _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                        _points[startIndex + length*width + height + 1]));
-                }
-            }
-        }
-    }
+}*/
 }
