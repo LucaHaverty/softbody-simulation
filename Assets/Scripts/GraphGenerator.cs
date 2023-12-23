@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 
 public class GraphGenerator : MonoBehaviour {
@@ -12,6 +13,7 @@ public class GraphGenerator : MonoBehaviour {
     public void CreateGraph(params (Vector2[] points, Color color)[] allData) {
         ClearGraph();
 
+        int layer = 1;
         foreach (var data in allData) {
             var points = data.points;
 
@@ -22,16 +24,30 @@ public class GraphGenerator : MonoBehaviour {
             var dataMax = new Vector2(points.Max(d => d.x), points.Max(d => d.y));
             var dataScale = dataMax - dataMin;
 
-            foreach (var d in points) {
-                Vector2 normalizedDataPos = (d - dataMin) / dataScale;
+            int pointFrequency =  Mathf.CeilToInt(points.Length / (float)SimConfig.MaxGraphPoints);
+
+            for (int i = 0; i < points.Length; i++) {
+                
+                if (i % pointFrequency != 0)
+                    continue;
+                
+                var p = points[i];
+                
+                Vector2 normalizedDataPos = (p - dataMin) / dataScale;
                 Vector2 localPosition = normalizedDataPos - new Vector2(0.5f, 0.5f);
+
+                if (float.IsNaN(localPosition.x) || float.IsNaN(localPosition.y))
+                    return;
 
                 var pointTrf = Instantiate(SimConfig.GraphPoint).transform;
                 pointTrf.parent = background;
                 pointTrf.GetComponent<SpriteRenderer>().color = data.color;
+                pointTrf.GetComponent<SpriteRenderer>().sortingOrder = layer;
 
                 pointTrf.localPosition = new Vector3(localPosition.x, localPosition.y, 0);
             }
+
+            layer++;
         }
     }
 
