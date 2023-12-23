@@ -1,35 +1,45 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 public class GraphGenerator : MonoBehaviour {
     public static GraphGenerator Instance;
-
-    public Transform background;
+    [SerializeField] private Transform background;
 
     private void Awake() {
         Instance = this;
     }
 
-    public static void CreateGraph(List<DataPoint> data) {
-        var xMin = data.Min(d => d.xPos);
-        var xMax = data.Max(d => d.xPos);
-        var xSize = xMax - xMin;
-        
-        var yMin = data.Min(d => d.yPos);
-        var yMax = data.Max(d => d.yPos);
-        var ySize = yMax - yMin;
-        
-        //void 
+    public void CreateGraph(params (Vector2[] points, Color color)[] allData) {
+        ClearGraph();
+
+        foreach (var data in allData) {
+            var points = data.points;
+
+            if (points.Length == 0)
+                continue;
+
+            var dataMin = new Vector2(points.Min(d => d.x), points.Min(d => d.y));
+            var dataMax = new Vector2(points.Max(d => d.x), points.Max(d => d.y));
+            var dataScale = dataMax - dataMin;
+
+            foreach (var d in points) {
+                Vector2 normalizedDataPos = (d - dataMin) / dataScale;
+                Vector2 localPosition = normalizedDataPos - new Vector2(0.5f, 0.5f);
+
+                var pointTrf = Instantiate(SimConfig.GraphPoint).transform;
+                pointTrf.parent = background;
+                pointTrf.GetComponent<SpriteRenderer>().color = data.color;
+
+                pointTrf.localPosition = new Vector3(localPosition.x, localPosition.y, 0);
+            }
+        }
     }
 
-    public struct DataPoint {
-        public float xPos;
-        public float yPos;
-
-        public DataPoint(float xPos, float yPos) {
-            this.xPos = xPos;
-            this.yPos = yPos;
+    private void ClearGraph() {
+        foreach (Transform child in background) {
+            Destroy(child.gameObject);
         }
+        /*while(background.childCount > 0)
+            DestroyImmediate(background.GetChild(0));*/
     }
 }

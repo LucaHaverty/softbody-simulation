@@ -10,9 +10,11 @@ public abstract class SimObject {
 
     private Vector3 _estimatedPosition = Vector3.zero;
     private Vector3 _estimatedVelocity = Vector3.zero;
+    private Vector3 _estimatedAcceleration = Vector3.zero;
 
     public Vector3 EstimatedPosition => _estimatedPosition;
     public Vector3 EstimatedVelocity => _estimatedVelocity;
+    public Vector3 EstimatedAcceleration => _estimatedAcceleration;
 
     protected SimObject(string name) {
         _rootGameObject = new(name) {
@@ -20,6 +22,7 @@ public abstract class SimObject {
                 position = Vector3.up * SimConfig.StartHeight
             }
         };
+        _rootGameObject.transform.parent = SimConfig.Sim.transform;
     }
 
     public void Update() {
@@ -37,12 +40,23 @@ public abstract class SimObject {
         });
 
         var prevPos = _estimatedPosition;
-        
+
         Vector3 sum = Vector3.zero;
         _points.ForEach(p => sum += p.transform.position);
         
         _estimatedPosition = sum / _points.Count;
-        _estimatedVelocity = (_estimatedPosition - prevPos) / Time.deltaTime;
+
+        if (prevPos.Equals(Vector3.zero))
+            return;
+
+        var prevVel = _estimatedVelocity;
+        
+        _estimatedVelocity = (_estimatedPosition - prevPos) / Time.fixedDeltaTime;
+
+        if (prevVel.Equals(Vector3.zero))
+            return;
+        
+        _estimatedAcceleration = (_estimatedVelocity - prevVel) / Time.fixedDeltaTime;
     }
 
     public void DestroyRootObject() {
