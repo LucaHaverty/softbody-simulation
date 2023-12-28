@@ -1,8 +1,8 @@
 using UnityEngine;
 
 public class Spring : MonoBehaviour {
-    private PointMass referencePointA;
-    private PointMass referencePointB;
+    public PointMass referencePointA;
+    public PointMass referencePointB;
 
     private float restingLength;
 

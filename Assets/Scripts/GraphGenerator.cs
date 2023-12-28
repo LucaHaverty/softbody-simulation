@@ -81,7 +81,6 @@ public class GraphGenerator : MonoBehaviour {
 
                 pointTrf.localPosition = new Vector3(localPosition.x, localPosition.y, 0);
             }
-
             layer++;
         }
 

@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public abstract class SimObject {
     protected readonly GameObject _rootGameObject;
@@ -65,19 +67,20 @@ public abstract class SimObject {
 }
 
 public class Cube : SimObject {
-    public Cube(int length, int width, int height, 
+    public Cube(int length, int width, int height,
         float pointSpacing)
         : base($"Cube ({length}, {width}, {height})") {
 
         // Center offset
-        _rootGameObject.transform.Translate(-new Vector3(length*pointSpacing/2, width*pointSpacing/2, height*pointSpacing/2));
+        _rootGameObject.transform.Translate(-new Vector3(length * pointSpacing / 2, height * pointSpacing / 2,
+            width * pointSpacing / 2));
 
         Dictionary<Vector3Int, PointMass> pointsDict = new();
 
         for (int h = 0; h < height; h++) {
             for (int w = 0; w < width; w++) {
                 for (int l = 0; l < length; l++) {
-                    pointsDict.Add(new Vector3Int(l,w,h), SimRunner.InstantiatePoint(
+                    pointsDict.Add(new Vector3Int(l, w, h), SimRunner.InstantiatePoint(
                         Vector3.up * (pointSpacing * h) + Vector3.right * (pointSpacing * w)
                                                         + Vector3.forward * (pointSpacing * l),
                         _rootGameObject.transform));
@@ -86,76 +89,85 @@ public class Cube : SimObject {
         }
 
         void AttemptAddConnection(PointMass pointA, Vector3Int posB) {
-            if (!pointsDict.TryGetValue(posB, out var pointB)) 
+            if (!pointsDict.TryGetValue(posB, out var pointB))
                 return;
-            
+
             if (pointA == pointB)
                 return;
-                
+            
+            foreach (var s in _springs) {
+                if ((s.referencePointA == pointA || s.referencePointA == pointB) 
+                    && (s.referencePointB == pointA || s.referencePointB == pointB)) {
+                    Debug.Log("Already exists");
+                    return;
+                }
+            }
+
             _springs.Add(SimRunner.InstantiateSpring(
                 _rootGameObject.transform, pointA, pointB));
         }
-        
+
         foreach (var kvp in pointsDict) {
-            for (int h = 0; h <= 1; h++) {
-                for (int w = 0; w <= 1; w++) {
-                    for (int l = 0; l <= 1; l++) {
+            for (int h = -1; h <= 1; h++) {
+                for (int w = -1; w <= 1; w++) {
+                    for (int l = -1; l <= 1; l++) {
                         AttemptAddConnection(kvp.Value, kvp.Key + new Vector3Int(l, w, h));
                     }
                 }
             }
+
+            //AttemptAddConnection(kvp.Value, kvp.Key - new Vector3Int(-1, 1, 1));
         }
 
         _points = pointsDict.Values.ToList();
     }
-    
-    /*public class Rope : SimObject {
-    public Rope(int numPoints = 5, float pointSpacing = 0.5f, float pointMass = 1, float springConstant = 8,
-        float dampingConstant = 0.1f)
-        : base($"Rope ({numPoints})") {
-
-        for (int p = 0; p < numPoints; p++) {
-            _points.Add(SimulationRunner.InstantiatePoint(
-                Vector3.up * (pointSpacing * p), _rootGameObject.transform, pointMass));
-        }
-
-        for (int s = 0; s < numPoints - 1; s++) {
-            _springs.Add(SimulationRunner.InstantiateSpring(
-                _rootGameObject.transform, springConstant, dampingConstant, _points[s], _points[s + 1]));
-        }
-    }
 }
 
-public class Plane : SimObject {
-    public Plane(int width = 5, int height = 5, float pointSpacing = 0.5f, float pointMass = 1,
-        float springConstant = 5, float dampingConstant = 0.1f)
-        : base($"Plane ({width}, {height})") {
+public class Square : SimObject {
+    public Square(int width, int height, float pointSpacing)
+        : base($"Square ({width}, {width})") {
 
-        for (int p = 0; p < width; p++) {
-            for (int p1 = 0; p1 < height; p1++) {
-                _points.Add(SimulationRunner.InstantiatePoint(
-                    Vector3.up * (pointSpacing * p) + Vector3.right * (pointSpacing * p1),
-                    _rootGameObject.transform, pointMass));
+        // Center offset
+        _rootGameObject.transform.Translate(-new Vector2(width * pointSpacing / 2, height * pointSpacing / 2));
+
+        Dictionary<Vector2Int, PointMass> pointsDict = new();
+
+        for (int h = 0; h < height; h++) {
+            for (int w = 0; w < width; w++) {
+                pointsDict.Add(new Vector2Int(w, h), SimRunner.InstantiatePoint(
+                    Vector3.up * (pointSpacing * h) + Vector3.right * (pointSpacing * w),
+                    _rootGameObject.transform));
             }
         }
 
-        for (int s = 0; s < width - 1; s++) {
-            for (int s1 = 0; s1 < width - 1; s1++) {
-                int startIndex = s + (width * s1);
+        void AttemptAddConnection(PointMass pointA, Vector2Int posB) {
+            if (!pointsDict.TryGetValue(posB, out var pointB))
+                return;
 
-                _springs.Add(SimulationRunner.InstantiateSpring(
-                    _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                    _points[startIndex + 1]));
-
-                _springs.Add(SimulationRunner.InstantiateSpring(
-                    _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                    _points[startIndex + width]));
-
-                _springs.Add(SimulationRunner.InstantiateSpring(
-                    _rootGameObject.transform, springConstant, dampingConstant, _points[startIndex],
-                    _points[startIndex + width + 1]));
+            if (pointA == pointB)
+                return;
+            
+            foreach (var s in _springs) {
+                if ((s.referencePointA == pointA || s.referencePointA == pointB) 
+                    && (s.referencePointB == pointA || s.referencePointB == pointB)) {
+                    Debug.Log("Already exists");
+                    return;
+                }
             }
+
+            _springs.Add(SimRunner.InstantiateSpring(
+                _rootGameObject.transform, pointA, pointB));
         }
+
+        foreach (var kvp in pointsDict) {
+            for (int h = -1; h <= 1; h++) {
+                for (int w = -1; w <= 1; w++) {
+                    AttemptAddConnection(kvp.Value, kvp.Key + new Vector2Int(w, h));
+                }
+            }
+            //AttemptAddConnection(kvp.Value, kvp.Key - new Vector2Int(-1, 1));
+        }
+
+        _points = pointsDict.Values.ToList();
     }
-}*/
 }

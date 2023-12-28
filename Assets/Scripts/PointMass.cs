@@ -17,7 +17,11 @@ public class PointMass : MonoBehaviour {
    public void UpdatePosition() {
       transform.position += velocity * Time.fixedDeltaTime;
 
-      if (transform.position.y < 0) {
+      // Collision with floor
+      if (transform.position.y <= 0) {
+         // Apply Friction
+         velocity *= SimConfig.CoefOfFriction;
+         
          velocity.y = 0;
          transform.position = new Vector3(transform.position.x, 0, transform.position.z);
          SimRunner.Instance.HasCollidedWithFloor = true;

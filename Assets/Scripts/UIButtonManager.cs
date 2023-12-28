@@ -13,6 +13,13 @@ public class UIButtonManager : MonoBehaviour {
         resetButton.onClick.AddListener(ResetPressed);
     }
 
+    private void Update() {
+        if (Input.GetKeyDown(KeyCode.Space))
+            PlayPausePressed();
+        if (Input.GetKeyDown(KeyCode.R))
+            ResetPressed();
+    }
+
     private void PlayPausePressed() {
         SimRunner.Instance.PlayPauseSim();
         playPauseText.text = SimRunner.Instance.SimRunning ? "Pause" : "Play";

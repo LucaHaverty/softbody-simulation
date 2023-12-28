@@ -84,6 +84,7 @@ public class SimRunner : MonoBehaviour {
 
     private void CreateObjects() {
         _simObjects.Add(new Cube(5, 5, 5, 0.5f));
+        //_simObjects.Add(new Square(5, 5, 0.5f));
     }
 
     private void DestroyObjects() {

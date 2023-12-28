@@ -29,4 +29,5 @@ public class SimConfig : MonoBehaviour {
     public static float DampingConstant => Config._dampingConstant;
     public static float PointMass => Config._pointMass;
     public static int MaxGraphPoints => Config._maxGraphPoints;
+    public static float CoefOfFriction => Config._coefOfFriction;
 }

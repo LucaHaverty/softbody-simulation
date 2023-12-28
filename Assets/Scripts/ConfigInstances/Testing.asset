@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 497a7759610519d488b8fafe9276f13c, type: 3}
   m_Name: Testing
   m_EditorClassIdentifier: 
-  _forceOfGravity: 0.02
+  _forceOfGravity: 0.05
+  _coefOfFriction: 0.2
   _startHeight: 5
-  _springConstant: 10
+  _springConstant: 20
   _dampingConstant: 0.35
   _pointMass: 1
   _maxGraphPoints: 200
